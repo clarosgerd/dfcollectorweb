@@ -9,16 +9,18 @@ cd dfcollectorweb
 2. Instalar dependencias
 Instala las dependencias necesarias para el proyecto:
 
-composer install
-npm install
-npm run build
-cp .env.example .env
-
-php artisan key:generate
+    composer install
+    npm install
+    npm run build
+    cp .env.example .env
+    php artisan key:generate
 
 Configuración
 Sigue los pasos para configurar el proyecto:
 
 1. Corre las migraciones
-php artisan migrate
+    php artisan migrate
+    php artisan migrate:refresh
+
+
 
