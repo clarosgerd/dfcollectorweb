@@ -1,13 +1,15 @@
 Sigue los pasos para clonar el proyecto e instalar las dependencias:
 
 1. Clonar el repositorio
-Clona este repositorio en tu máquina local:
 
-https://github.com/clarosgerd/dfcollectorweb.git
+    Clona este repositorio en tu máquina local:
 
-cd dfcollectorweb
+    https://github.com/clarosgerd/dfcollectorweb.git
+
+    cd dfcollectorweb
 
 2. Instalar dependencias
+
 Instala las dependencias necesarias para el proyecto:
 
     composer install
@@ -20,10 +22,11 @@ Instala las dependencias necesarias para el proyecto:
    
     php artisan key:generate
 
-Configuración
+3. Configuración       
+
 Sigue los pasos para configurar el proyecto:
 
-1. Corre las migraciones
+    Corre las migraciones
 
    php artisan migrate
    
