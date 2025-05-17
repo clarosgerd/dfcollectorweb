@@ -27,10 +27,8 @@ Instala las dependencias necesarias para el proyecto:
 Sigue los pasos para configurar el proyecto:
 
     Corre las migraciones
-
-   php artisan migrate
-   
-   php artisan migrate:refresh
+    php artisan migrate
+    php artisan migrate:refresh
 
 
 
