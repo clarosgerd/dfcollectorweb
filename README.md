@@ -4,6 +4,7 @@ Sigue los pasos para clonar el proyecto e instalar las dependencias:
 Clona este repositorio en tu máquina local:
 
 https://github.com/clarosgerd/dfcollectorweb.git
+
 cd dfcollectorweb
 
 2. Instalar dependencias
