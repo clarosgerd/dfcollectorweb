@@ -21,7 +21,7 @@ class FormsController extends Controller
 
     public function index()
     {
-
+$id = Auth::user()->id;
         return response()->json(
             auth()->user()->forms()->withCount('responses')->get()
         );
