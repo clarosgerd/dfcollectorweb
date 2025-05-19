@@ -16,8 +16,10 @@ class FormsFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            //
+        return[
+            'title'=>fake()->name(),
+            'description'=>fake()->word(),
+            'user_id'=>\App\Models\User::factory(),
         ];
     }
 }

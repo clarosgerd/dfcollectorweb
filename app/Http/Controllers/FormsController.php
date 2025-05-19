@@ -6,10 +6,7 @@ use App\Models\Forms;
 use App\Http\Requests\StoreFormsRequest;
 use App\Http\Requests\UpdateFormsRequest;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Http\Request;
-
-
-
+use Illuminate\Support\Facades\Auth;
 
 
 class FormsController extends Controller
@@ -21,10 +18,21 @@ class FormsController extends Controller
 
     public function index()
     {
-$id = Auth::user()->id;
-        return response()->json(
-            auth()->user()->forms()->withCount('responses')->get()
-        );
+        // $forms = Forms::all();
+        $user = Auth::user();
+        /*  if (auth()->check()) {
+         $forms = auth()->user()->forms()->withCount('responses')->get();
+        //}
+        else {
+
+        }*/
+        //$user->forms()->withCount('responses')->get(); 
+        /* return response()->json(
+            auth()->user()->forms()->withCount('responses')->get()*/
+            // $forms = auth()->user()->forms()->withCount('responses')->get();
+        return response()->json([
+            $user->forms()->withCount('responses')->get()
+        ]);
     }
 
     /**
@@ -40,7 +48,8 @@ $id = Auth::user()->id;
      */
     public function store(StoreFormsRequest $request)
     {
-        $form = auth()->user()->forms()->create($request->validated());
+        $user = Auth::user();
+        $form =  $user->forms()->create($request->validated());
 
         return response()->json($form, 201);
     }
@@ -74,12 +83,19 @@ $id = Auth::user()->id;
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Forms $forms)
+    public function destroy($id)
     {
         //
-        $this->authorize('delete', $forms);
+        $forms = Forms::find($id);
+
         $forms->delete();
 
-        return response()->noContent();
+        //$this->authorize('delete', $forms);
+        //$forms->delete();
+
+        //return response()->noContent();
+        return response()->json([
+            'message' => 'Forms deleted successfully'
+        ]);
     }
 }
