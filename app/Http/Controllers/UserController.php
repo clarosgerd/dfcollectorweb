@@ -30,7 +30,7 @@ class UserController extends Controller
             'message' => 'Login Sucessfully',
             'token' => $token,
             'token_type' => 'Bearer'
-        ], 201);
+        ], 200);
     }
     public function logout(Request $request)
     {
@@ -38,6 +38,6 @@ class UserController extends Controller
         $request->user()->tokens()->delete();
         return response([
             'message' => 'user logged out succesfully'
-        ], 201);
+        ], 200);
     }
 }
