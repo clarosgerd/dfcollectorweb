@@ -9,7 +9,11 @@ class Forms extends Model
 {
     /** @use HasFactory<\Database\Factories\FormsFactory> */
     use HasFactory;
-    protected $fillable = ['title', 'description', 'user_id'];
+    protected $fillable = [
+        'id',
+        'title', 
+        'description', 
+        'user_id'];
 
     public function user()
     {

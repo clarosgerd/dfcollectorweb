@@ -7,7 +7,8 @@ use App\Http\Requests\StoreFormsRequest;
 use App\Http\Requests\UpdateFormsRequest;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Auth;
-
+use Inertia\Inertia;
+use App\Http\Resources\FormsCollection;
 
 class FormsController extends Controller
 {
@@ -19,7 +20,7 @@ class FormsController extends Controller
     public function index()
     {
         // $forms = Forms::all();
-        $user = Auth::user();
+        $form = Forms::paginate();
         /*  if (auth()->check()) {
          $forms = auth()->user()->forms()->withCount('responses')->get();
         //}
@@ -29,9 +30,33 @@ class FormsController extends Controller
         //$user->forms()->withCount('responses')->get(); 
         /* return response()->json(
             auth()->user()->forms()->withCount('responses')->get()*/
-            // $forms = auth()->user()->forms()->withCount('responses')->get();
-        return response()->json([
-            $user->forms()->withCount('responses')->get()
+        // $forms = auth()->user()->forms()->withCount('responses')->get();
+
+        //  $data =   $form->findOrFail();
+        ///    dd($form);
+        $formCollection = new FormsCollection($form);
+        dd($formCollection);
+        return Inertia::render('forms/Index', [
+            'dataf' => $formCollection,
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+            ]
+        ]);
+    }
+
+
+    public function getByTest()
+    {
+
+        $form = Forms::paginate();
+        $formCollection = new FormsCollection($form);
+        return Inertia::render('test/Index', [
+            'dataf' => $formCollection,
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+            ]
         ]);
     }
 
