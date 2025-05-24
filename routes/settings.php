@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\EnterpriseController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -18,4 +20,13 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/appearance');
     })->name('appearance');
+
+      Route::redirect('settings', 'settings/enterprise');
+      Route::get('settings/enterprise', [EnterpriseController::class, 'edit'])->name('enterprise.edit');
+
+
+    Route::redirect('settings', 'settings/Users/Index');
+    Route::get('settings/Users/Index', [ProfileController::class, 'index']);
+    //Route::get('settings/Users/create', [ProfileController::class, 'index'])->name();
+
 });

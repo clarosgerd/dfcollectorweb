@@ -10,12 +10,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Http\Resources\UserCollection;
 
 class ProfileController extends Controller
 {
     /**
      * Show the user's profile settings page.
      */
+
+    public function index(): Response
+    {
+        return Inertia::render('settings/Users/Index', [
+            //  'filters' => Request::all('search', 'role', 'trashed'),
+            'users' => new UserCollection(
+                Auth::user()
+                    ->enterprise
+                    ->users()
+                    ->with('enterprise')
+                    ->paginate()
+            ),
+        ]);
+    }
+
     public function edit(Request $request): Response
     {
         return Inertia::render('settings/profile', [
@@ -23,7 +39,10 @@ class ProfileController extends Controller
             'status' => $request->session()->get('status'),
         ]);
     }
-
+    public function create()
+    {
+        //
+    }
     /**
      * Update the user's profile settings.
      */

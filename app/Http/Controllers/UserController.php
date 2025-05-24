@@ -7,9 +7,17 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use Laravel\Sanctum\HasApiTokens;
-
+use Illuminate\Support\Facades\Auth;
+use Inertia\Response;
+use Inertia\Inertia;
+use App\Http\Resources\UserCollection;
 class UserController extends Controller
 {
+
+
+
+
+
     public function login(Request $request)
     {
         //
@@ -39,5 +47,10 @@ class UserController extends Controller
         return response([
             'message' => 'user logged out succesfully'
         ], 200);
+    }
+
+    public function create()
+    {
+        //
     }
 }

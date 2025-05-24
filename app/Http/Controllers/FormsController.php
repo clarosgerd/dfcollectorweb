@@ -35,7 +35,7 @@ class FormsController extends Controller
         //  $data =   $form->findOrFail();
         ///    dd($form);
         $formCollection = new FormsCollection($form);
-        dd($formCollection);
+      //  dd($formCollection);
         return Inertia::render('forms/Index', [
             'dataf' => $formCollection,
             'flash' => [

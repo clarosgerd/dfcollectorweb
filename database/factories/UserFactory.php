@@ -23,10 +23,15 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+       // ini_set('memory_limit','-1'); 
+        $role=$this->faker->randomElement(['0', '1', '2', '3']);
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'role' => $role,
+            'enterprise_id'=> \App\Models\Enterprise::factory(),
+            'photo'=>$this->faker->image(storage_path('app/public/users'),400,300, null, false) ,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];

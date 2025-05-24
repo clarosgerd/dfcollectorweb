@@ -15,7 +15,7 @@ class FormsSeeder extends Seeder
     {
         //
          Forms::factory()
-        ->count(50)
+        ->count(4)
         ->hasUser(4)
         ->create();
     }

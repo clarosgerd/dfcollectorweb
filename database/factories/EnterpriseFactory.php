@@ -16,8 +16,10 @@ class EnterpriseFactory extends Factory
      */
     public function definition(): array
     {
+      //  ini_set('memory_limit','-1'); 
         return [
-            //
+            'name' => fake()->word(),
+         //   'created_by' => \App\Models\User::factory(),
         ];
     }
 }

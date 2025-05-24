@@ -1,10 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Settings;
 
-use App\Models\Enterprise;
+
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEnterpriseRequest;
 use App\Http\Requests\UpdateEnterpriseRequest;
+use App\Models\Enterprise;
+use Inertia\Inertia;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Response;
+use App\Http\Resources\EnterpriseCollection;
 
 class EnterpriseController extends Controller
 {
@@ -13,7 +20,16 @@ class EnterpriseController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('settings/Users/Index', [
+          //  'filters' => Request::all('search', 'role', 'trashed'),
+            'users' => new EnterpriseCollection(
+               Auth::user()
+                    ->enterprise
+                    ->users()
+                    ->with('enterprise')
+                    ->paginate()
+            ),
+        ]);
     }
 
     /**
@@ -43,9 +59,20 @@ class EnterpriseController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Enterprise $enterprise)
+    public function edit(Request $request): Response
     {
-        //
+      
+        return Inertia::render('settings/enterprise', [
+            'user' => new EnterpriseCollection(
+                Auth::user()
+                    ->enterprise
+                    ->users()
+                    ->with('enterprise')
+                    ->paginate()
+            ),
+            'status' => $request->session()->get('status'),
+
+        ]);
     }
 
     /**

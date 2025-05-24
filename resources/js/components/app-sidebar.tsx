@@ -24,7 +24,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'New questionnaire',
-        href: 'form',
+        href: '/form',
         icon: LayoutGrid,
     },
 ];

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Enterprise;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,5 +14,9 @@ class EnterpriseSeeder extends Seeder
     public function run(): void
     {
         //
+         Enterprise::factory()
+        ->count(10)
+        //->hasUsers()
+        ->create();
     }
 }

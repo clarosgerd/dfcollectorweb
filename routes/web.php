@@ -12,10 +12,12 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
+
+        
     })->name('dashboard');
 
-Route::get('/form/{id}', [FormsController::class, 'index']);
-Route::get('/test', [FormsController::class, 'getByTest']);
+Route::get('form', [FormsController::class, 'index'])->name('form');
+//Route::get('/test', [FormsController::class, 'getByTest']);
 
     
 //--Route::get('form', 'App\Http\Controllers\FormsController@index');
