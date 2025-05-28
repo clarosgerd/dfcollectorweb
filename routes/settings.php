@@ -21,12 +21,19 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('settings/appearance');
     })->name('appearance');
 
-      Route::redirect('settings', 'settings/enterprise');
-      Route::get('settings/enterprise', [EnterpriseController::class, 'edit'])->name('enterprise.edit');
+     // Route::redirect('settings', 'settings/enterprise');
+      
+      Route::get('settings/enterprise', [EnterpriseController::class, 'show'])->name('enterprice.show');
+      Route::patch('settings/enterprise', [EnterpriseController::class, 'edit'])->name('enterprice.update');
 
 
-    Route::redirect('settings', 'settings/Users/Index');
-    Route::get('settings/Users/Index', [ProfileController::class, 'index']);
-    //Route::get('settings/Users/create', [ProfileController::class, 'index'])->name();
+   // Route::redirect('settings', 'settings/users');
+    Route::get('settings/Users/Index', [ProfileController::class, 'index'])->name('Users.index');
+    Route::put('settings/Users/Index/{id}', [ProfileController::class, 'update'])->name('Users.update');
+     Route::post('settings/Users/Index', [ProfileController::class, 'store'])->name('Users.store');
+   // Route::resource('settings/users', ProfileController::class);
+       
+  //  Route::post('settings/store', [ProfileController::class, 'store'])->name('Users.store');
+  //  Route::put('settings/update', [ProfileController::class, 'update'])->name('Users.update');
 
 });

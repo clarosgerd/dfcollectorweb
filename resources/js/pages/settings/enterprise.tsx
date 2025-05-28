@@ -46,6 +46,7 @@ export default function Enterprise() {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+       // alert('1');
         patch(route('enterprice.update'), {
             preserveScroll: true,
         });
@@ -82,17 +83,16 @@ export default function Enterprise() {
                             <Label htmlFor="name">User Name</Label>
 
                             <Input
-                                id="name"
+                                id="username"
                                 className="mt-1 block w-full"
                                 value={auth.user.name}
                                 onChange={(e) => setData('created_by', e.target.value)}
-                                required
-                                autoComplete="created_by"
+                                autoComplete="username"
                                 placeholder="Full created_by"
                                 disabled
                             />
 
-                            <InputError className="mt-2" message={errors.created_at} />
+                            <InputError className="mt-2" message={errors.name} />
                         </div>
                         
 

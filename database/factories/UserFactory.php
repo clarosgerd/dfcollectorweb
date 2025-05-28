@@ -23,15 +23,30 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-       // ini_set('memory_limit','-1'); 
-        $role=$this->faker->randomElement(['0', '1', '2', '3']);
+        // ini_set('memory_limit','-1'); 
+
+        $randomImages = [
+            'https://m.media-amazon.com/images/I/41WpqIvJWRL._AC_UY436_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/61ghDjhS8vL._AC_UY436_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/61c1QC4lF-L._AC_UY436_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/710VzyXGVsL._AC_UY436_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/61EPT-oMLrL._AC_UY436_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/71r3ktfakgL._AC_UY436_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/61CqYq+xwNL._AC_UL640_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/71cVOgvystL._AC_UL640_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/71E+oh38ZqL._AC_UL640_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/61uSHBgUGhL._AC_UL640_QL65_.jpg',
+            'https://m.media-amazon.com/images/I/71nDK2Q8HAL._AC_UL640_QL65_.jpg'
+        ];
+
+        $role = $this->faker->randomElement(['root', 'editor', 'respondent', 'observer', 'guest']);
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'role' => $role,
-            'enterprise_id'=> \App\Models\Enterprise::factory(),
-            'photo'=>$this->faker->image(storage_path('app/public/users'),400,300, null, false) ,
+            'enterprise_id' => \App\Models\Enterprise::factory(),
+            'photo' => $randomImages[rand(0, 10)],
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
@@ -42,7 +57,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

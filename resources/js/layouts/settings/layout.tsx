@@ -62,7 +62,6 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                         {
                           //   @if(auth.user.role==1)              //auth.map.
                         sidebarNavItems.map((item, index) => (
-                      // @if( (Auth::user()->role=='1') && ( $role->name != 'Admin' && $role->name!='Regional Admin' ) )
 
                        
                         <Button
@@ -77,14 +76,12 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                             })}
                         >
                          
-                            <Link href={item.href} prefetch>
+                            <Link href={item.href}  prefetch>
                                 {item.title}
                             </Link>
                         </Button>
-                    //    @endif
                         ))
                         
-                       //  @endif  
                         }
 
                     </nav>

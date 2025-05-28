@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use Illuminate\Support\Facades\DB;
 
 
 class User extends Authenticatable
@@ -62,5 +63,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Forms::class);
     }
-    
+    public static function getRoleOptions(): array
+    {
+        $type = DB::select("SHOW COLUMNS FROM users WHERE Field = 'role'")[0]->Type;
+
+        preg_match('/enum\((.*)\)/', $type, $matches);
+        $roles = str_getcsv($matches[1], ',', "'");
+
+        return $roles;
+    }
 }

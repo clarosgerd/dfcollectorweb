@@ -1,8 +1,9 @@
 import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
-import { FormEventHandler, SetStateAction } from 'react';
+import { FormEventHandler, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, SetStateAction, use } from 'react';
 import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,DialogDescription } from '@/components/ui/dialog';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -14,9 +15,27 @@ import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { SharedData } from '@/types';
 import { Trash2 } from 'lucide-react';
-import { User, PaginatedData } from '@/types';
+import { Auth, User, PaginatedData } from '@/types';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import {
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
+
 
 import { Plus, Pencil, CheckCircle2, XCircle, Calendar, List, CheckCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { array } from 'zod';
 
 
 interface UserData {
@@ -28,17 +47,22 @@ interface UserData {
     created_at: string;
     updated_at: string;
     enterprise_id: number;
-    role: number;
-    // [key: string]: unknown; // This allows for additional properties...
+    role: string | null;
+    [key: string]: unknown; // This allows for additional properties...
 
 }
 
 
 interface Props {
+    auth: Auth;
     users: UserData[];
     flash?: {
         success?: string;
         error?: string;
+    };
+    filters: {
+        search: string;
+        filter: string;
     };
 }
 
@@ -50,9 +74,9 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/settings/Users',
     },
 ];
-export default function Index({ users }: any) {
+export default function Index({ users, roles, auth, organization }: any) {
     //export default function Index() {
-    const { flash }: any = usePage().props;
+    const { flash, filters }: any = usePage().props;
     const [isOpen, setIsOpen] = useState(false);
     const [editingUsers, setEditingUsers] = useState<User | null>(null);
     const [showToast, setShowToast] = useState(false);
@@ -84,29 +108,36 @@ export default function Index({ users }: any) {
         }
     }, [showToast]);
 
-    const { data, setData, post, put, processing, reset, delete: destroy } = useForm({
+    const { data, setData, post, put, processing, errors, reset, delete: destroy } = useForm({
         id: 0,
         name: '',
         email: '',
-        role: '',
-        entreprise_id: '',
+        role: roles[0],
+        enterprise_id: organization,
         photo: '',
-        created_at: '',
-        updated_at: '',
-        deleted_at: ''
+        enterprise: 0,
+        //  rule: 
+        //created_at: '',
+        //updated_at: '',
+        //deleted_at: ''
     });
+
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (editingUsers) {
-            put(route('User.update', editingUsers.id), {
+            // alert(editingUsers.id);
+            put(route('Users.update', editingUsers.id), {
                 onSuccess: () => {
                     setIsOpen(false);
                     reset();
                     setEditingUsers(null);
+                    //reset();
                 },
             });
         } else {
-            post(route('User.store'), {
+            // alert('hola');
+            post(route('Users.store'), {
                 onSuccess: () => {
                     setIsOpen(false);
                     reset();
@@ -120,109 +151,221 @@ export default function Index({ users }: any) {
             //   ...prevData,
             id: users.id,
             name: users.name,
-            email: '',
-            role: '',
-            entreprise_id: '',
+            email: users.email,
+            role: users.role,
+            enterprise_id: organization,
             photo: '',
-            created_at: '',
-            updated_at: '',
-            deleted_at: ''
+            enterprise: users.enterprise.id,
+            //created_at: '',
+            //updated_at: '',
+            //deleted_at: ''
         });
         setIsOpen(true);
     };
 
     const handleDelete = (id: number) => {
-        alert(id);
-        destroy(route('User.destroy', id));
+        //alert(id);
+        destroy(route('Users.destroy', id));
     };
     const handlePageChange = (page: number) => {
-        router.get(route('User.index'), {
-            page
+        router.get(route('Users.index'), {
+            page,
+            // search: searchTerm,
+            // filter: completionFilter,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
         });
     };
     return (
-        <div>
-            <h1 className="mb-8 text-3xl font-bold">Contacts</h1>
-            <div className="flex items-center justify-between mb-6">
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Manage Users" />
+            <SettingsLayout>
+                <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-6 bg-gradient-to-br from-background to-muted/20">
 
-                <Link
-                    className="btn-indigo focus:outline-none"
-                    href={route('User.create')}
-                >
-                    <span>Create</span>
-                    <span className="hidden md:inline"> Contact</span>
-                </Link>
-            </div>
-            <table className="w-full caption-bottom text-sm">
-                <thead className="[&_tr]:border-b">
-                    <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">title</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">description</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">user_id </th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">created_at </th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">updated_at </th>
-                    </tr>
-                </thead>
-                <tbody className="[&_tr:last-child]:border-0">
-                    {users.data.map((form: any) => (
-                        <tr key={form.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                            <td className="p-4 align-middle font-medium">{form.title}</td>
-                            <td className="p-4 align-middle max-w-[200px] truncate">
-                                {form.description || 'No description'}
-                            </td>
-                            <td className="p-4 align-middle">
-                                {form.user_id || 'No description'}
-                            </td>
-                            <td className="p-4 align-middle">
-                                {form.created_at ? (
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                                        {new Date(form.created_at).toLocaleDateString()}
-                                    </div>
+                    {
+                        showToast && (
+                            <div className={`fixed top-2 right-2 z-50 flex items-center gap-2 rounded-lg p-2 shadow-lg ${toastType === 'success' ? 'bg-green-500' : 'bg-red-500'
+                                } text-white animate-in fade-in slide-in-from-top-5`}>
+                                {toastType === 'success' ? (
+                                    <CheckCircle2 className="h-5 w-5" />
                                 ) : (
-                                    <span className="text-muted-foreground">No due date</span>)}
-                            </td>
+                                    <XCircle className="h-5 w-5" />
+                                )}
+                                <span>{toastMessage}</span>
+                            </div>
+                        )
+                    }
 
-                            <td className="p-4 align-middle">
-                                {form.updated_at ? (
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                                        {new Date(form.updated_at).toLocaleDateString()}
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-3xl font-bold tracking-tight">Users</h1>
+                        <p className="text-muted-foreground mt-1">Manage your Users and stay organized</p>
+                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                            <DialogTrigger  >
+                                <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg">
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    New User
+                                </Button>
+                            </DialogTrigger>
+
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        {editingUsers ? 'Edit List' : 'Create Form List'}
+                                        <DialogDescription>Fixed the warning</DialogDescription>
+
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="title">Name</Label>
+                                        <Input id="name"
+                                            value={data.name}
+                                            onChange={(e) => setData('name', e.target.value)}
+                                            required />
+                                        <InputError message={errors.name} />
                                     </div>
-                                ) : (
-                                    <span className="text-muted-foreground">No due date</span>)}
-                            </td>
-                            <td className="p-4 align-middle text-right">
-                                <div className="flex justify-end gap-2">
-                                    <Button variant="ghost"
-                                        size="icon"
-                                        onClick={() => handleEdit(form)}
-                                        className="hover:bg-primary/10 hover:text-primary"
-                                    >
-                                        <Pencil className="h-4 w-4" />
+                                    <div className="space-y-2">
+                                        <Label htmlFor="Email">Email</Label>
+                                        <Input id="email"
+                                            type="text"
+                                            value={data.email}
+                                            onChange={(e) => setData('email', e.target.value)}
+                                            required />
+                                        <InputError message={errors.email} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="role">role</Label>
+                                        <Select name="role" value={data.role} onValueChange={(val) => setData("role", val)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Selecciona un rol" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {roles.map((role: string) => (
+                                                    <SelectItem key={role} value={role}>
+                                                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+
+
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="photo">Photo</Label>
+                                        <Input id="photo"
+                                            type="text"
+                                            value={data.photo}
+                                            onChange={(e) => setData('photo', e.target.value)}
+                                        />
+                                        <Input id="id"
+                                            type="hidden"
+                                            value={data.id}
+                                        // onChange={(e) => setData('enterprise_id', e.target.value)}
+                                        />
+                                        <Input id="enterprise_id"
+                                            type="hidden"
+                                            value={organization}
+                                        // onChange={(e) => setData('enterprise_id', e.target.value)}
+                                        />
+                                    </div>
+                                    <Button type="submit" disabled={processing}>
+                                        {editingUsers ? 'Update' : 'Create'}
                                     </Button>
-                                    <Button variant="ghost"
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                    <div className="rounded-md border">
+                        <div className="relative w-full overflow-auto">
+                            <table className="w-full caption-bottom text-sm">
+                                <thead className="[&_tr]:border-b">
+                                    <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Email</th>
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Role </th>
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Photo </th>
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="[&_tr:last-child]:border-0">
+                                    {users.data.map((form: any) => (
+                                        <tr key={form.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                            <td className="p-4 align-middle max-w-[200px] truncate">{form.name}</td>
+
+                                            <td className="p-4 align-middle font-medium">{form.email}</td>
+                                            <td className="p-4 align-middle font-medium">{form.role}</td>
+                                            <td className="p-4 align-middle font-medium">{form.photo}</td>
+                                            <td className="p-4 align-middle text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <Button variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleEdit(form)}
+                                                        className="hover:bg-primary/10 hover:text-primary"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleDelete(form.id)}
+                                                        className="hover:bg-destructive/10 hover:text-destructive"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {users.length === 0 && (
+                                        <tr>
+                                            <td colSpan={6} className="p-4 text-center text-muted-foreground">
+                                                No Users foreground
+                                            </td>
+                                        </tr>
+                                    )}
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {/* Pagination */}
+                    <div className="flex items-center justify-between px-2">
+                        <div className="text-sm text-muted-foreground">
+                            Showing {users.meta.from} to {users.meta.to} of {users.meta.total} results
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Button variant="outline"
+                                size="icon"
+                                onClick={() => handlePageChange(users.meta.current_page - 1)}
+                                disabled={users.meta.current_page === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <div className="flex items-center space-x-1">
+                                {Array.from({ length: users.meta.last_page }, (_, i) => i + 1).map((page) => (
+                                    <Button key={page}
+                                        variant={page === users.meta.current_page ? "default" : "outline"}
                                         size="icon"
-                                        onClick={() => handleDelete(form.id)}
-                                        className="hover:bg-destructive/10 hover:text-destructive"
+                                        onClick={() => handlePageChange(page)}
                                     >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>                                            </div>
-                            </td>
-                        </tr>
-                    ))}
-                    {users.length === 0 && (
-                        <tr>
-                            <td colSpan={6} className="p-4 text-center text-muted-foreground">
-                                No tasks foreground                                        </td>
-                        </tr>
-                    )}
+                                        {page}
+                                    </Button>))}
+                            </div>
+                            <Button variant="outline"
+                                size="icon"
+                                onClick={() => handlePageChange(users.meta.current_page + 1)}
+                                disabled={users.meta.current_page === users.meta.last_page}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </SettingsLayout>
 
-
-                </tbody>
-            </table>
-
-        </div>
+        </AppLayout>
     );
 };
 
