@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import { Head, router, usePage } from "@inertiajs/react";
+import { Head, router, usePage, Link } from "@inertiajs/react";
 import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from 'react';
 import { type BreadcrumbItem } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -145,7 +145,11 @@ export default function FormsIndex({ forms }: any) {
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">Lists</h1>
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
-
+                    <DialogTrigger  >
+                        <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg">
+                            <Plus className="h-4 w-4 mr-2" />
+                        </Button>
+                    </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>{editingForms ? 'Edit List' : 'Create Form List'}</DialogTitle>
