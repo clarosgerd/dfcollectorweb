@@ -133,39 +133,22 @@ public function index()
      */
    public function update(Request $request, Form $form)
     {
-        $this->authorize('update', $form);
+ $this->authorize('update', $form);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'questions' => 'array'
+            'questions' => 'required|array',
+            'questions.*.id' => 'sometimes|exists:questions,id',
+            'questions.*.question_text' => 'required|string|max:500',
+            'questions.*.type' => 'required|in:text,textarea,radio,checkbox,select,range,date,time,datetime',
+            'questions.*.is_required' => 'boolean',
+            'questions.*.options' => 'nullable|array',
         ]);
 
         $form->update($validated);
 
-        // Actualizar preguntas existentes y añadir nuevas
-        if ($request->has('questions')) {
-            $existingQuestionIds = [];
-            
-            foreach ($request->questions as $questionData) {
-                if (isset($questionData['id'])) {
-                    $form->questions()
-                        ->where('id', $questionData['id'])
-                        ->update($questionData);
-                    $existingQuestionIds[] = $questionData['id'];
-                } else {
-                    $newQuestion = $form->questions()->create($questionData);
-                    $existingQuestionIds[] = $newQuestion->id;
-                }
-            }
-            
-            // Eliminar preguntas que ya no están
-            $form->questions()
-                ->whereNotIn('id', $existingQuestionIds)
-                ->delete();
-        }
-
-        return redirect()->route('forms.index')->with('success', 'Formulario actualizado correctamente');
+        return back()->with('success', 'Formulario actualizado');
     }
 public function reorder(Request $request, Form $form)
     {
