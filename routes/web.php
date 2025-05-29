@@ -16,7 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
     })->name('dashboard');
 
-Route::get('form', [FormsController::class, 'index'])->name('form');
+Route::get('form', [FormsController::class, 'index'])->name('forms.index');
 //Route::get('/test', [FormsController::class, 'getByTest']);
 
     

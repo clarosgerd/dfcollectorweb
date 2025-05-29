@@ -25,7 +25,7 @@ interface FormData {
 
 }
 interface Props {
-    forms: FormData[];
+    dataf: FormData[];
     flash?: {
         success?: string;
         error?: string;
@@ -39,7 +39,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 
 ];
-export default function FormsIndex({ forms }: any) {
+export default function FormsIndex({ dataf }: any) {
 
     const { flash }: any = usePage().props;
     const [isOpen, setIsOpen] = useState(false);
@@ -200,7 +200,7 @@ export default function FormsIndex({ forms }: any) {
                     </tr>
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
-                    {forms.data.map((form: any) => (
+                    {dataf.data.map((form: any) => (
                         <tr key={form.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                             <td className="p-4 align-middle font-medium">{form.title}</td>
                             <td className="p-4 align-middle max-w-[200px] truncate">
@@ -247,7 +247,7 @@ export default function FormsIndex({ forms }: any) {
                             </td>
                         </tr>
                     ))}
-                    {forms.data.length === 0 && (
+                    {dataf.data.length === 0 && (
                         <tr>
                             <td colSpan={6} className="p-4 text-center text-muted-foreground">
                                 No tasks foreground                                        </td>
