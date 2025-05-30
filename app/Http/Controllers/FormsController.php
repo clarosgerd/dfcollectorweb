@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Forms;
+use App\Models\Form;
 use App\Models\User;
 use App\Http\Requests\StoreFormsRequest;
 use App\Http\Requests\UpdateFormsRequest;
@@ -16,35 +16,27 @@ class FormsController extends Controller
     /**
      * Display a listing of the resource.
      */
-
-
-    //public function index()
-   // {
-        // $forms = Forms::all();
-        //$form = Forms::paginate();
-        /*  if (auth()->check()) {
-         $forms = auth()->user()->forms()->withCount('responses')->get();
-        //}
-        else {
-
-        }*/
-        //$user->forms()->withCount('responses')->get(); 
-       // return response()->json(
-         //   auth()->user()->forms()->withCount('responses')->get()
-         //$forms = auth()->user()->forms()->withCount('responses')->get();
-
-        //  $data =   $form->findOrFail();
-        ///    dd($form);
-       // $formCollection = new FormsCollection($form);
-      //  dd($formCollection);
-        //return Inertia::render('forms/Index', [
-          //  'dataf' => $formCollection,
-           // 'flash' => [
-            //    'success' => session('success'),
-            //    'error' => session('error'),
-           // ]
-       // ]);
-   // }
+/*
+public function index(Form $form)
+    {
+       // dd($form);
+        $form->loadMissing(['questions' => fn($query) => $query->where('form_id', $form->id)->orderBy('order')]);
+//dd($form);
+        return Inertia::render('forms/FormBuilder', [
+            'form' => [
+                'id' => $form->id,
+                'title' => $form->title,
+            ],
+            'questions' => $form->questions->map(fn ($q) => [
+                'id' => $q->id,
+                'question_text' => $q->question_text,
+                'type' => $q->type,
+                'required' => $q->required,
+            ]),
+        ]);
+    }
+*/
+    
 public function index()
     {
         $forms = Auth()->user()
@@ -53,6 +45,7 @@ public function index()
             ->latest()
             ->get();
         $formCollection = new FormsCollection($forms);
+        // dd($forms);
         return Inertia::render('forms/Index', [
             'forms' => $formCollection,
              'flash' => [
@@ -118,6 +111,7 @@ public function index()
     /**
      * Show the form for editing the specified resource.
      */
+    /*
    public function edit(Form $form)
     {
         $this->authorize('update', $form);
@@ -125,13 +119,31 @@ public function index()
         return Inertia::render('forms/Edit', [
             'form' => $form->load('questions')
         ]);
-    }
+    }*/
 
+ public function edit(Form $form)
+    {
+       // dd($form);
+        $form->load(['questions' => fn ($query) => $query->orderBy('order')]);
+
+        return Inertia::render('forms/FormBuilder', [
+            'form' => [
+                'id' => $form->id,
+                'title' => $form->title,
+            ],
+            'questions' => $form->questions->map(fn ($q) => [
+                'id' => $q->id,
+                'question_text' => $q->question_text,
+                'type' => $q->type,
+                'required' => $q->required,
+            ]),
+        ]);
+    }
 
     /**
      * Update the specified resource in storage.
      */
-   public function update(Request $request, Form $form)
+   public function update(Request $request, Forms $form)
     {
  $this->authorize('update', $form);
 
@@ -142,7 +154,7 @@ public function index()
             'questions.*.id' => 'sometimes|exists:questions,id',
             'questions.*.question_text' => 'required|string|max:500',
             'questions.*.type' => 'required|in:text,textarea,radio,checkbox,select,range,date,time,datetime',
-            'questions.*.is_required' => 'boolean',
+            'questions.*.required' => 'boolean',
             'questions.*.options' => 'nullable|array',
         ]);
 
@@ -150,7 +162,7 @@ public function index()
 
         return back()->with('success', 'Formulario actualizado');
     }
-public function reorder(Request $request, Form $form)
+public function reorder(Request $request, Forms $form)
     {
         $this->authorize('update', $form);
 

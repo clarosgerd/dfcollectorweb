@@ -4,9 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Forms;
+use App\Models\Form;
 
-class FormsSeeder extends Seeder
+class FormSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,9 +14,9 @@ class FormsSeeder extends Seeder
     public function run(): void
     {
         //
-         Forms::factory()
-        ->count(4)
-        ->hasUser(4)
+         Form::factory()
+        ->count(10)
+        ->hasUser(1)
         ->create();
     }
 }

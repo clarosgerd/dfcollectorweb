@@ -27,6 +27,12 @@ const mainNavItems: NavItem[] = [
         href: '/form',
         icon: LayoutGrid,
     },
+    
+    {
+        title: 'Questionnaire',
+        href: '/forms',
+        icon: LayoutGrid,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

@@ -7,11 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
-import { FileQuestion, Plus, Pencil, Trash2, CheckCircle2, XCircle, Calendar, List, CheckCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, CheckCircle2, XCircle, Calendar, List, CheckCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 
 interface FormData {
@@ -40,11 +41,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 export default function FormsIndex({ forms }: any) {
 
-    const { flash, url }: any = usePage().props;
+    const { flash }: any = usePage().props;
     const [isOpen, setIsOpen] = useState(false);
     const [editingForms, setEditingForms] = useState<FormData | null>(null);
-    const [editingQuestion, setEditingQuestion] = useState<FormData | null>(null);
-
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error'>('success');
@@ -74,7 +73,7 @@ export default function FormsIndex({ forms }: any) {
         }
     }, [showToast]);
 
-    const { data, setData, get, post, put, processing, reset, delete: destroy } = useForm({
+    const { data, setData, post, put, processing, reset, delete: destroy } = useForm({
         id: 0,
         title: '',
         description: '',
@@ -101,23 +100,6 @@ export default function FormsIndex({ forms }: any) {
                 },
             });
         }
-
-
-
-    };
-    const handleForm = (form: FormData) => {
-        setEditingQuestion(form);
-        setData({
-            //   ...prevData,
-            id: form.id,
-            title: form.title,
-            description: form.description,
-            user_id: '', // Valor por defecto
-            created_at: '', // Valor por defecto
-            updated_at: '', // Valor por defecto
-
-        });
-        setIsOpen(true);
     };
     const handleEdit = (form: FormData) => {
         setEditingForms(form);
@@ -133,6 +115,7 @@ export default function FormsIndex({ forms }: any) {
         });
         setIsOpen(true);
     };
+
     const handleDelete = (id: number) => {
         alert(id);
         destroy(route('form.destroy', id));
@@ -213,7 +196,6 @@ export default function FormsIndex({ forms }: any) {
             <table className="w-full caption-bottom text-sm">
                 <thead className="[&_tr]:border-b">
                     <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"></th>
                         <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">title</th>
                         <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">description</th>
                         <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">user_id </th>
@@ -224,16 +206,6 @@ export default function FormsIndex({ forms }: any) {
                 <tbody className="[&_tr:last-child]:border-0">
                     {forms.data.map((form: any) => (
                         <tr key={form.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                            <td>
-                                <Link
-                                    className="btn-indigo focus:outline-none"
-                                    href={route('forms.edit', form.id)}
-                                >
-                                    <span>Create</span>
-                                    <span className="hidden md:inline"> Editar Preguntas</span>
-                                </Link>
-
-                            </td>
                             <td className="p-4 align-middle font-medium">{form.title}</td>
                             <td className="p-4 align-middle max-w-[200px] truncate">
                                 {form.description || 'No description'}
@@ -275,15 +247,7 @@ export default function FormsIndex({ forms }: any) {
                                         className="hover:bg-destructive/10 hover:text-destructive"
                                     >
                                         <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="ghost"
-                                        size="icon"
-                                        onClick={() => handleForm(form)}
-                                        className="hover:bg-destructive/10 hover:text-destructive"
-                                    >
-                                        <FileQuestion className="h-4 w-4" />
-                                    </Button>
-                                </div>
+                                    </Button>                                            </div>
                             </td>
                         </tr>
                     ))}

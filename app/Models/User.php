@@ -61,7 +61,7 @@ class User extends Authenticatable
 
     public function forms()
     {
-        return $this->hasMany(Forms::class);
+        return $this->hasMany(Form::class);
     }
     public static function getRoleOptions(): array
     {
