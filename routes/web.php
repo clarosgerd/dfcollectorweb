@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\FormsController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\FormResponseController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -37,6 +38,7 @@ Route::post('/forms/{form}/questions/reorder', [QuestionController::class, 'reor
 //Route::post('/questions', [QuestionController::class, 'store'])->name('questions.store');
 
 
+Route::get('/forms/{form}', [FormResponseController::class, 'show']);
 
 });
 

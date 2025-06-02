@@ -1,145 +1,102 @@
-// src/Components/QuestionCard.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import { router } from '@inertiajs/react';
-
-interface Option {
-  id?: number;
-  option_text: string;
-}
+import React, { useState, useEffect } from 'react';
 
 interface Question {
   id: number;
   question_text: string;
   type: string;
   required: boolean;
-  options?: Option[];
 }
 
-interface QuestionCardProps {
+interface Props {
   question: Question;
+  isEditing: boolean;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onEdit: (q: Question) => void;
   onDelete: () => void;
-  onEdit: (updated: Question) => void;
-  autoEdit?: boolean;
 }
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete, onEdit, autoEdit = false }) => {
-  const [editing, setEditing] = useState(autoEdit);
-  const [text, setText] = useState(question.question_text);
-  const [type, setType] = useState(question.type);
-  const [required, setRequired] = useState(question.required);
-  const [options, setOptions] = useState<Option[]>(question.options || []);
-  const [showSaved, setShowSaved] = useState(false);
-
-  const requiresOptions = ['radio', 'checkbox', 'dropdown'].includes(type);
-  const inputRef = useRef<HTMLInputElement>(null);
+const QuestionCard: React.FC<Props> = ({
+  question,
+  isEditing,
+  onStartEdit,
+  onCancelEdit,
+  onEdit,
+  onDelete
+}) => {
+  const [formData, setFormData] = useState<Question>(question);
   useEffect(() => {
-    if (autoEdit && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [autoEdit]);
-  const handleAddOption = () => {
-    setOptions([...options, { option_text: '' }]);
+
+    setFormData(question);
+  }, [question]);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    //const [checked, setChecked] = useState('')
+    //setChecked(e.target.value);
+    const { name, value, type ,checked} = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
-  const handleOptionChange = (index: number, value: string) => {
-    const updated = [...options];
-    updated[index].option_text = value;
-    setOptions(updated);
+  const handleSubmit = () => {
+    onEdit(formData);
   };
 
-  const handleRemoveOption = (index: number) => {
-    setOptions(options.filter((_, i) => i !== index));
-  };
+  if (isEditing) {
+    return (
+      <div className="p-4 border rounded-md mb-2 bg-white">
+        <input
+          type="text"
+          name="question_text"
+          value={formData.question_text}
+          onChange={handleChange}
+          className="w-full p-2 border rounded mb-2"
+        />
+        <select
+          name="type"
+          value={formData.type}
+          onChange={handleChange}
+          className="w-full p-2 border rounded mb-2"
+        >
+          <option value="text">Texto</option>
+          <option value="textarea">Parrafo</option>
+          <option value="radio">Elección única</option>
+          <option value="checkbox">Casillas</option>
+          <option value="dropdown">Desplegable</option>
+          <option value="number">Número</option>
+          <option value="date">Fecha</option>
+          <option value="email">Email</option>
+        </select>
+        <label className="flex items-center space-x-2 mb-2">
+          <input
+            type="checkbox"
+            name="required"
+            checked={formData.required}
+            onChange={handleChange}
+          />
+          <span>Requerida</span>
+        </label>
+        <div className="space-x-2">
+          <button onClick={handleSubmit} className="px-3 py-1 bg-blue-600 text-white rounded">Guardar</button>
+          <button onClick={onCancelEdit} className="px-3 py-1 text-sm text-gray-600">Cancelar</button>
+        </div>
+      </div>
+    );
+  }
 
-  const handleSave = () => {
-    router.put(`/questions/${question.id}`, {
-      question_text: text,
-      type,
-      required,
-      options: requiresOptions ? options.map(o => o.option_text).filter(o => o.trim() !== '') : [],
-    }, {
-      onSuccess: () => {
-        onEdit({
-          ...question,
-          question_text: text,
-          type,
-          required,
-          options: requiresOptions ? options : [],
-        });
-        setEditing(false);
-        setShowSaved(true);
-        setTimeout(() => setShowSaved(false), 2000);
-      },
-    });
-  };
-
+  // Vista de solo lectura
   return (
-    <div className="p-4 mb-3 rounded border shadow-sm bg-white" id={`question-${question.id}`}>
-      {editing ? (
-        <>
-          <input value={text} onChange={(e) => setText(e.target.value)} className="block w-full mb-2 border p-2 rounded" />
-
-          <select value={type} onChange={(e) => setType(e.target.value)} className="w-full mb-2 border p-2 rounded">
-            <option value="text">Texto corto</option>
-            <option value="textarea">Texto largo</option>
-            <option value="number">Número</option>
-            <option value="date">Fecha</option>
-            <option value="email">Email</option>
-            <option value="dropdown">Lista desplegable</option>
-            <option value="radio">Opción única</option>
-            <option value="checkbox">Casillas</option>
-          </select>
-
-          <label className="inline-flex items-center mb-2">
-            <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} className="mr-2" />
-            Requerido
-          </label>
-
-          {requiresOptions && (
-            <div className="mb-2">
-              <label className="block font-semibold mb-1">Opciones</label>
-              {options.map((opt, i) => (
-                <div key={i} className="flex items-center mb-1">
-                  <input
-                    type="text"
-                    value={opt.option_text}
-                    onChange={(e) => handleOptionChange(i, e.target.value)}
-                    className="flex-1 border p-2 rounded"
-                  />
-                  <button type="button" onClick={() => handleRemoveOption(i)} className="ml-2 text-red-500">✕</button>
-                </div>
-              ))}
-              <button type="button" onClick={handleAddOption} className="text-sm text-blue-600 mt-1">+ Agregar opción</button>
-            </div>
-          )}
-
-          <div className="space-x-2 mt-2">
-            <button onClick={handleSave} className="bg-green-600 text-white px-3 py-1 rounded">Guardar</button>
-            <button onClick={() => setEditing(false)} className="text-gray-600">Cancelar</button>
-            {showSaved && <span className="ml-4 text-green-600">Guardado ✓</span>}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="text-lg font-semibold">{question.question_text}</div>
-          <div className="text-sm text-gray-500 mb-2">
-            Tipo: {question.type} | Requerido: {question.required ? 'Sí' : 'No'}
-          </div>
-
-          {requiresOptions && question.options && (
-            <ul className="mb-2 pl-4 list-disc text-sm text-gray-700">
-              {question.options.map((opt, i) => (
-                <li key={i}>{opt.option_text}</li>
-              ))}
-            </ul>
-          )}
-
-          <div className="space-x-2">
-            <button onClick={() => setEditing(true)} className="text-blue-600 text-sm">Editar</button>
-            <button onClick={onDelete} className="text-red-600 text-sm">Eliminar</button>
-          </div>
-        </>
-      )}
+    <div className="p-4 border rounded-md mb-2 bg-gray-50">
+      <div className="flex justify-between items-center mb-1">
+        <h4 className="font-medium">{question.question_text}</h4>
+        <div className="space-x-2">
+          <button onClick={onStartEdit} className="text-blue-600 text-sm">Editar</button>
+          <button onClick={onDelete} className="text-red-600 text-sm">Eliminar</button>
+        </div>
+      </div>
+      <p className="text-sm text-gray-600">Tipo: {question.type}</p>
+      {question.required && <p className="text-xs text-red-500">* Obligatoria</p>}
     </div>
   );
 };
