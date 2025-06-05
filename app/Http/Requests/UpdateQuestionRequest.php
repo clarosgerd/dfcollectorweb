@@ -3,26 +3,34 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
-class UpdateQuestionRequest extends FormRequest
-{
+use Illuminate\Validation\Rule;
+class UpdateQuestionRequest extends FormRequest {
     /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return false;
+    * Determine if the user is authorized to make this request.
+    */
+
+    public function authorize(): bool {
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
-    {
-        return [
-            //
+    * Get the validation rules that apply to the request.
+    *
+    * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+    */
+
+    public function rules(): array {
+        $rules = [
+            'question_text' => 'required|string|max:255',
+            'type' => 'required|in:text,textarea,radio,checkbox,dropdown,number,date,email',
+            'required' => 'boolean',
         ];
+
+        if (in_array($this->type, ['radio', 'checkbox', 'dropdown'])) {
+            $rules['options'] = 'required|array|min:2';
+            $rules['options.*'] = 'required|string|max:255';
+        }
+
+        return $rules;
     }
 }

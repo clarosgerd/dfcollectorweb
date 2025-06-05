@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('question_text');
             $table->enum('type', ['text', 'textarea', 'number', 'date', 'dropdown', 'email', 'radio', 'checkbox']);
             $table->boolean('required')->default(false);
-            $table->json('options')->nullable(); // Para opciones de selección
+          //  $table->json('options')->nullable(); // Para opciones de selección
             $table->json('validation')->nullable(); // Validaciones adicionales
             $table->integer('order')->default(0);
             $table->timestamps();

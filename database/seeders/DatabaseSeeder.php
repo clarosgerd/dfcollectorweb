@@ -27,12 +27,12 @@ class DatabaseSeeder extends Seeder
             'title' => 'Encuesta de Satisfacción',
         ]);
 
-        $q1 = Question::create([
+       /* $q1 = Question::create([
             'form_id' => $form->id,
             'question_text' => '¿Cuál es tu nombre?',
             'type' => 'text',
             'required' => true,
-        ]);
+        ]);*/
 
         $q2 = Question::create([
             'form_id' => $form->id,
@@ -60,12 +60,12 @@ class DatabaseSeeder extends Seeder
             ['option_text' => 'Capacitación', 'order' => 2],
         ]);
 
-        $q4 = Question::create([
+       /* $q4 = Question::create([
             'form_id' => $form->id,
             'question_text' => 'Comentarios adicionales',
             'type' => 'textarea',
             'required' => false,
-        ]);
+        ]);*/
 
     }
 }

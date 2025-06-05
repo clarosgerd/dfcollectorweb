@@ -31,24 +31,11 @@ class QuestionController extends Controller {
     * Store a newly created resource in storage.
     */
 
-    public function store( Request $request, $formId) {
-       // $request = json_encode( $request );
-       // dd( $request );
-      /*  $validated = $request->validate( [
-            'question_text' => 'required|string|max:255',
-            'type' => 'required|in:text,radio,checkbox',
-            'required' => 'boolean',
-        ] );*/
-
-        $question = Question::create( [
-            'form_id' => $formId,
-            'question_text' => $request[ 'question_text' ],
-            'type' => $request[ 'type' ],
-            'required' => $request[ 'required' ] ?? false,
-            'order' => Question::where( 'form_id', $formId )->max( 'order' ) + 1,
-        ] );
-
-        return redirect()->back()->with( 'question', $question );
+    public function store( StoreQuestionRequest $request, Form $form): RedirectResponse
+    {
+       $question = $form->questions()->create($request->validated());
+        $question->syncOptions($request->input('options', []));
+        return redirect()->back()->with('success', 'Pregunta guardada');
     }
 
     public function reorder( Request $request, Form $form ) {
@@ -99,38 +86,11 @@ class QuestionController extends Controller {
     }*/
 
 
-    public function update(Request $request, Question $question)
+    public function update(UpdateQuestionRequest $request, Question $question): RedirectResponse
 {
-    $data = $request->validate([
-        'question_text' => 'required|string|max:255',
-        'type' => 'required|string|in:text,textarea,number,date,email,dropdown,radio,checkbox',
-        'required' => 'boolean',
-        'options' => 'nullable|array',
-        'options.*' => 'string|max:255',
-    ]);
-
-    $question->update([
-        'question_text' => $data['question_text'],
-        'type' => $data['type'],
-        'required' => $data['required'],
-    ]);
-
-    // Actualizar opciones si es un tipo que las requiere
-    if (in_array($data['type'], ['radio', 'checkbox', 'dropdown'])) {
-        $question->options()->delete(); // eliminar opciones previas
-
-        foreach ($data['options'] ?? [] as $index => $optionText) {
-            $question->options()->create([
-                'option_text' => $optionText,
-                'order' => $index,
-            ]);
-        }
-    } else {
-        // Si ya no requiere opciones, eliminarlas
-        $question->options()->delete();
-    }
-
-    return response()->json($question->load('options'));
+    $question->update($request->validated());
+        $question->syncOptions($request->input('options', []));
+        return redirect()->back()->with('success', 'Pregunta actualizada');
 }
 
     /**

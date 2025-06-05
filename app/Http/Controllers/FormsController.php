@@ -4,128 +4,164 @@ namespace App\Http\Controllers;
 
 use App\Models\Form;
 use App\Models\User;
+use App\Models\Question;
+use App\Models\QuestionOption;
 use App\Http\Requests\StoreFormsRequest;
 use App\Http\Requests\UpdateFormsRequest;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Http\Resources\FormsCollection;
-
-class FormsController extends Controller
-{
+use App\Http\Resources\FormsResource;
+use App\Http\Resources\UserResource;
+use App\Http\Resources\UserCollection;
+use App\Http\Resources\QuestionResource;
+use App\Http\Resources\QuestionCollection;
+use App\Http\Resources\QuestionOptionResource;
+class FormsController extends Controller {
     /**
-     * Display a listing of the resource.
-     */
-/*
-public function index(Form $form)
-    {
-       // dd($form);
-        $form->loadMissing(['questions' => fn($query) => $query->where('form_id', $form->id)->orderBy('order')]);
-//dd($form);
-        return Inertia::render('forms/FormBuilder', [
+    * Display a listing of the resource.
+    */
+    /*
+
+    public function index( Form $form ) {
+        // dd( $form );
+        $form->loadMissing( [ 'questions' => fn( $query ) => $query->where( 'form_id', $form->id )->orderBy( 'order' ) ] );
+        //dd( $form );
+        return Inertia::render( 'forms/FormBuilder', [
             'form' => [
                 'id' => $form->id,
                 'title' => $form->title,
             ],
-            'questions' => $form->questions->map(fn ($q) => [
+            'questions' => $form->questions->map( fn ( $q ) => [
                 'id' => $q->id,
                 'question_text' => $q->question_text,
                 'type' => $q->type,
                 'required' => $q->required,
-            ]),
-        ]);
+            ] ),
+        ] );
     }
-*/
-    
-public function index()
-    {
+    */
+
+    public function index() {
         $forms = Auth()->user()
-            ->forms()
-            //->withCount('questions')
-            ->latest()
-            ->get();
-        $formCollection = new FormsCollection($forms);
-        // dd($forms);
-        return Inertia::render('forms/Index', [
+        ->forms()
+        //->withCount( 'questions' )
+        ->latest()
+        ->get();
+        $formCollection = new FormsCollection( $forms );
+        // dd( $forms );
+        return Inertia::render( 'forms/Index', [
             'forms' => $formCollection,
-             'flash' => [
-                'success' => session('success'),
-                'error' => session('error'),
+            'flash' => [
+                'success' => session( 'success' ),
+                'error' => session( 'error' ),
             ]
-        ]);
+        ] );
     }
 
-    public function getByTest()
-    {
+    public function getByTest() {
 
         $form = Forms::paginate();
-        $formCollection = new FormsCollection($form);
-        return Inertia::render('test/Index', [
+        $formCollection = new FormsCollection( $form );
+        return Inertia::render( 'test/Index', [
             'dataf' => $formCollection,
             'flash' => [
-                'success' => session('success'),
-                'error' => session('error'),
+                'success' => session( 'success' ),
+                'error' => session( 'error' ),
             ]
-        ]);
+        ] );
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-     public function create()
-    {
-        return Inertia::render('forms/Create');
+    * Show the form for creating a new resource.
+    */
+
+    public function create() {
+        return Inertia::render( 'forms/Create' );
     }
 
-
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
+    * Store a newly created resource in storage.
+    */
+
+    public function store( Request $request ) {
+        $validated = $request->validate( [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'questions' => 'array'
-        ]);
+        ] );
 
-        $form = auth()->user()->forms()->create($validated);
+        $form = auth()->user()->forms()->create( $validated );
 
-        if ($request->has('questions')) {
-            $form->questions()->createMany($request->questions);
+        if ( $request->has( 'questions' ) ) {
+            $form->questions()->createMany( $request->questions );
         }
 
-        return redirect()->route('forms.index')->with('success', 'Formulario creado correctamente');
+        return redirect()->route( 'forms.index' )->with( 'success', 'Formulario creado correctamente' );
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Forms $form)
-    {
+    * Display the specified resource.
+    */
+
+    public function show( Forms $form ) {
         //
-        $form->load('questions');
-        return response()->json($form);
+        $form->load( 'questions' );
+        return response()->json( $form );
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
+    * Show the form for editing the specified resource.
+    */
     /*
-   public function edit(Form $form)
-    {
-        $this->authorize('update', $form);
 
-        return Inertia::render('forms/Edit', [
-            'form' => $form->load('questions')
+    public function edit( Form $form ) {
+        $this->authorize( 'update', $form );
+
+        return Inertia::render( 'forms/Edit', [
+            'form' => $form->load( 'questions' )
+        ] );
+    }
+    */
+
+    public function edit( Form $form ) {
+     // Cargar preguntas y opciones ordenadas
+        $form->load(['questions.options' => function ($query) {
+            $query->orderBy('order');
+        }]);
+
+        return Inertia::render('forms/FormBuilder', [
+            //'form' => FormsResource::collection(Form::all()->where('id', $form->id)->sortBy('order'))->first(), // Asegurarse de que el formulario esté ordenado
+            'form' => $form,
+            'questions' => $form->questions->map(fn ($q) => [
+                'id' => $q->id,
+                'question_text' => $q->question_text,
+                'type' => $q->type,
+                'required' => $q->required,
+                'options' => QuestionOptionResource::collection(QuestionOption::all()->where('question_id', $q->id)->sortBy('order')) // Asegurarse de que las opciones estén ordenadas
+                // 
+            ]), 
+                       // 'questions' => QuestionResource::collection($form->questions->sortBy('order')),
+            'flash' => [
+                'success' => session( 'success' ),
+                'error' => session( 'error' ),
+            ]
         ]);
-    }*/
+    }
 
- public function edit(Form $form)
-    {
-       // dd($form);
-        $form->load(['questions' => fn ($query) => $query->orderBy('order')]);
+   /* public function edit( Form $form ) {
+        //dd( $form );
+       $form->load(['questions' => fn ($query) => $query->orderBy('order')]);
+//dd( $form );
 
+$questions=$form->questions->map(fn ($q) => [
+                'id' => $q->id,
+                'question_text' => $q->question_text,
+                'type' => $q->type,
+                'required' => $q->required,
+]);
+dd( $questions );
         return Inertia::render('forms/FormBuilder', [
             'form' => [
                 'id' => $form->id,
@@ -138,16 +174,16 @@ public function index()
                 'required' => $q->required,
             ]),
         ]);
-    }
+    }*/
 
     /**
-     * Update the specified resource in storage.
-     */
-   public function update(Request $request, Forms $form)
-    {
- $this->authorize('update', $form);
+    * Update the specified resource in storage.
+    */
 
-        $validated = $request->validate([
+    public function update( Request $request, Forms $form ) {
+        $this->authorize( 'update', $form );
+
+        $validated = $request->validate( [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'questions' => 'required|array',
@@ -156,41 +192,41 @@ public function index()
             'questions.*.type' => 'required|in:text,textarea,radio,checkbox,select,range,date,time,datetime',
             'questions.*.required' => 'boolean',
             'questions.*.options' => 'nullable|array',
-        ]);
+        ] );
 
-        $form->update($validated);
+        $form->update( $validated );
 
-        return back()->with('success', 'Formulario actualizado');
+        return back()->with( 'success', 'Formulario actualizado' );
     }
-public function reorder(Request $request, Forms $form)
-    {
-        $this->authorize('update', $form);
 
-        $request->validate([
+    public function reorder( Request $request, Forms $form ) {
+        $this->authorize( 'update', $form );
+
+        $request->validate( [
             'questions' => 'required|array',
             'questions.*' => 'exists:questions,id,form_id,'.$form->id
-        ]);
+        ] );
 
-        Question::updateOrder($request->questions);
+        Question::updateOrder( $request->questions );
 
-        return response()->json(['message' => 'Orden actualizado correctamente']);
+        return response()->json( [ 'message' => 'Orden actualizado correctamente' ] );
     }
     /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
+    * Remove the specified resource from storage.
+    */
+
+    public function destroy( $id ) {
         //
-        $forms = Forms::find($id);
+        $forms = Forms::find( $id );
 
         $forms->delete();
 
-        //$this->authorize('delete', $forms);
+        //$this->authorize( 'delete', $forms );
         //$forms->delete();
 
         //return response()->noContent();
-        return response()->json([
+        return response()->json( [
             'message' => 'Forms deleted successfully'
-        ]);
+        ] );
     }
 }

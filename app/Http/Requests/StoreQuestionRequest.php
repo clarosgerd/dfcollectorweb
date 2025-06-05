@@ -11,7 +11,7 @@ class StoreQuestionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +21,18 @@ class StoreQuestionRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            //
+      $rules = [
+            'form_id' => 'required|exists:forms,id',
+            'question_text' => 'required|string|max:255',
+            'type' => 'required|in:text,textarea,radio,checkbox,dropdown,number,date,email',
+            'required' => 'boolean',
         ];
+
+        if (in_array($this->type, ['radio', 'checkbox', 'dropdown'])) {
+            $rules['options'] = 'required|array|min:2';
+            $rules['options.*'] = 'required|string|max:255';
+        }
+
+        return $rules;
     }
 }
